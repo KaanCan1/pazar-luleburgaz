@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pazar | Lüleburgaz</title>
+
+    <style>
+        .map-container {
+            margin: 2rem 0;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .maps-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+        
+        .map-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .map-header {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+        
+        .map-title {
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+        }
+        
+        .map-address {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        
+        .map-item iframe {
+            width: 100%;
+            height: 300px;
+            border: none;
+            display: block;
+        }
+        
+        .maps-title {
+            text-align: center;
+            color: #fff;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .maps-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .map-item iframe {
+                height: 250px;
+            }
+        }
+        
+        /* Diğer mevcut stiller */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            z-index: -1;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .header {
+            text-align: center;
+            padding: 3rem 1rem 2rem;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .status-banner {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            padding: 1rem;
+            color: white;
+            font-weight: 500;
+            margin: 0 1rem 2rem;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .section-title {
+            text-align: center;
+            color: white;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .product-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .fresh-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ff4757;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .product-image {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .product-name {
+            color: white;
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .product-price {
+            color: #ffd700;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .product-description {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 1.5rem;
+            line-height: 1.4;
+        }
+
+        .order-btn {
+            background: linear-gradient(45deg, #25d366, #128c7e);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            font-size: 0.9rem;
+        }
+
+        .order-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4);
+        }
+
+        .info-section {
+            margin-bottom: 4rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .info-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .info-title {
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-content {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-top: 4rem;
+        }
+
+        .footer-content h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+        }
+
+        .footer-content p {
+            margin-bottom: 0.3rem;
+            opacity: 0.8;
+        }
+
+        .loading {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .products-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    
+    <header class="header">
+        <h1>Pazar</h1>
+        <p class="subtitle">Topraktan Sofranıza</p>
+    </header>
+
+    <div class="status-banner" id="status-banner">
+        Pazartesi sabahları taze gelir | lüleburgaz Kapalı Pazar Yeri
+    </div>
+
+    <div class="container">
+        <section>
+            <h2 class="section-title">Günlük Taze Ürünler</h2>
+            <div class="products-grid" id="products-grid"></div>
+        </section>
+
+        <section class="info-section">
+            <h2 class="section-title">İletişim & Bilgi</h2>
+            <div class="info-grid" id="info-grid"></div>
+        </section>
+
+        <div class="map-container" id="map-container">
+            <h2 class="maps-title">Pazar Konumları</h2>
+            <div class="maps-grid">
+                <div class="map-item">
+                    <div class="map-header">
+                        <h3 class="map-title">Pazartesi</h3>
+                        <p class="map-address">Lüleburgaz Kapalı Pazar Yeri</p>
+                    </div>
+                    <iframe 
+                        src="https://www.google.com/maps?q=Lüleburgaz+Kapalı+Pazar+Yeri&output=embed"
+                        allowfullscreen="" 
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+                <div class="map-item">
+                    <div class="map-header">
+                        <h3 class="map-title">Çarşamba</h3>
+                        <p class="map-address">8 Kasım Semt Pazarı</p>
+                    </div>
+                    <iframe 
+                        src="https://www.google.com/maps?q=8+Kasım,+Eski+Müsellim+Cd.+No+20/A,+39750+Lüleburgaz/Kırklareli&output=embed"
+                        allowfullscreen="" 
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <h3>Pazar - Lüleburgaz</h3>
+            <p>Doğal, taze ve kaliteli ürünlerle hizmetinizdeyiz</p>
+            <p>© 2025 Tasarım: Kaan Can Kurt</p>
+        </div>
+    </footer>
+
+    <script>
+        const products = [
+            { 
+                name: "Domates", 
+                price: "30 TL/kg", 
+                emoji: "🍅",
+                description: "",
+                fresh: true
+            },
+            { 
+                name: "Biber", 
+                price: "30 TL/adet", 
+                emoji: "🌶️",
+                description: "",
+                fresh: true
+            },
+            { 
+                name: "Taze Fasulye", 
+                price: "80 TL/kg", 
+                emoji: "🫑",
+                description: "",
+                fresh: false
+            },
+            { 
+                name: "Patlıcan", 
+                price: "30 TL/kg", 
+                emoji: "🍆",
+                description: "",
+                fresh: true
+            },
+            { 
+                name: "Acı Biber", 
+                price: "40 TL/kg", 
+                emoji: "🌶️🌶️🌶️",
+                description: "",
+                fresh: true
+            },
+        ];
+
+        const phone = "+905374905608";
+
+        // Günlük adres ve harita bilgileri
+        function getLocationInfo() {
+            const today = new Date();
+            const dayOfWeek = today.getDay(); // 0: Pazar, 1: Pazartesi, 2: Salı, 3: Çarşamba, ...
+            
+            if (dayOfWeek === 1) { // Pazartesi
+                return {
+                    address: "Lüleburgaz Kapalı Pazar Yeri",
+                    fullAddress: "Kapalı Pazar, Lüleburgaz, Kırklareli",
+                    mapQuery: "Lüleburgaz+Kapalı+Pazar+Yeri",
+                    hours: "Pazartesi: 07:00 - 19:00",
+                    announcement: "Bugün Lüleburgaz Kapalı Pazar Yerindeyiz!",
+                    showLocation: true
+                };
+            } else if (dayOfWeek === 3) { // Çarşamba
+                return {
+                    address: "8 Kasım, Eski Müsellim Cd.",
+                    fullAddress: "No 20/A, 39750 Lüleburgaz/Kırklareli",
+                    mapQuery: "8+Kasım,+Eski+Müsellim+Cd.+No+20/A,+39750+Lüleburgaz/Kırklareli",
+                    hours: "Çarşamba: 07:00 - 19:00",
+                    announcement: "Bugün 8 Kasım Semt Pazarındayız!",
+                    showLocation: true
+                };
+            } else {
+                const daysUntilMarket = getDaysUntilNextMarket(dayOfWeek);
+                return {
+                    address: null,
+                    fullAddress: null,
+                    mapQuery: null,
+                    hours: "Pazartesi ve Çarşamba açığız",
+                    announcement: `🍅 Pazara ${daysUntilMarket} gün kaldı!`,
+                    showLocation: false,
+                    daysUntilMarket: daysUntilMarket
+                };
+            }
+        }
+
+        function getDaysUntilNextMarket(currentDay) {
+            let daysToMonday, daysToWednesday;
+            
+            if (currentDay === 0) { // Pazar
+                daysToMonday = 1;
+                daysToWednesday = 3;
+            } else if (currentDay === 2) { // Salı
+                daysToMonday = 6;
+                daysToWednesday = 1;
+            } else if (currentDay === 4) { // Perşembe
+                daysToMonday = 4;
+                daysToWednesday = 6;
+            } else if (currentDay === 5) { // Cuma
+                daysToMonday = 3;
+                daysToWednesday = 5;
+            } else if (currentDay === 6) { // Cumartesi
+                daysToMonday = 2;
+                daysToWednesday = 4;
+            }
+            
+            return Math.min(daysToMonday, daysToWednesday);
+        }
+
+        function renderProducts() {
+            const container = document.getElementById("products-grid");
+            container.innerHTML = products.map(product => `
+                <div class="product-card">
+                    ${product.fresh ? '<div class="fresh-badge">Taze!</div>' : ''}
+                    <div class="product-image">
+                        ${product.emoji}
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">${product.name}</h3>
+                        <div class="product-price">${product.price}</div>
+                        <p class="product-description">${product.description}</p>
+                        <button class="order-btn" onclick="order('${product.name}', '${product.price}')">
+                            WhatsApp ile Sipariş Ver
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderContactInfo() {
+            const locationInfo = getLocationInfo();
+            const container = document.getElementById("info-grid");
+            
+            if (locationInfo.showLocation) {
+                container.innerHTML = `
+                    <div class="info-card">
+                        <span class="info-icon">📱</span>
+                        <div class="info-title">WhatsApp Sipariş</div>
+                        <div class="info-content">+90 537 490 56 08</div>
+                    </div>
+                    <div class="info-card">
+                        <span class="info-icon">📍</span>
+                        <div class="info-title">Bugünkü Konum</div>
+                        <div class="info-content">
+                            ${locationInfo.address}<br>
+                            ${locationInfo.fullAddress}
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <span class="info-icon">🕐</span>
+                        <div class="info-title">Çalışma Saatleri</div>
+                        <div class="info-content">${locationInfo.hours}</div>
+                    </div>
+                    <div class="info-card">
+                        <span class="info-icon">🚚</span>
+                        <div class="info-title">Teslimat</div>
+                        <div class="info-content">
+                            Ücretsiz ev teslimatı<br>
+                            (50 TL ve üzeri)
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="info-card">
+                        <span class="info-icon">📱</span>
+                        <div class="info-title">WhatsApp Sipariş</div>
+                        <div class="info-content">+90 537 490 56 08</div>
+                    </div>
+                    <div class="info-card">
+                        <span class="info-icon">📅</span>
+                        <div class="info-title">Pazar Günleri</div>
+                        <div class="info-content">
+                            Pazartesi: Lüleburgaz Kapalı Pazar Yeri<br>
+                            Çarşamba: 8 Kasım Semt Pazarı
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <span class="info-icon">🕐</span>
+                        <div class="info-title">Çalışma Saatleri</div>
+                        <div class="info-content">${locationInfo.hours}</div>
+                    </div>
+                    <div class="info-card">
+                        <span class="info-icon">⏰</span>
+                        <div class="info-title">Sonraki Pazar</div>
+                        <div class="info-content">
+                            ${locationInfo.daysUntilMarket} gün sonra<br>
+                            Sipariş için arayabilirsiniz
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function updateAnnouncement() {
+            const locationInfo = getLocationInfo();
+            const banner = document.getElementById("status-banner");
+            banner.textContent = locationInfo.announcement;
+        }
+
+        function order(productName, price) {
+            const message = `Merhaba! 🌿\n\n${productName} (${price}) sipariş vermek istiyorum.`;
+            const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, "_blank");
+        }
+
+        // Sayfa yüklendiğinde tüm içeriği render et
+        document.addEventListener('DOMContentLoaded', function() {
+            renderProducts();
+            renderContactInfo();
+            updateAnnouncement();
+        });
+
+        // Butona tıklanınca loading animasyonu
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('order-btn')) {
+                const originalText = e.target.innerHTML;
+                e.target.innerHTML = '<div class="loading"></div> Yönlendiriliyor...';
+                setTimeout(() => {
+                    e.target.innerHTML = originalText;
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>
